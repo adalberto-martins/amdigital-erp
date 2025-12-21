@@ -1,5 +1,5 @@
 <?php
-require "../app/auth/verifica_login.php";
+require __DIR__ . "/../app/auth/seguranca.php";
 ?>
 
 <!DOCTYPE html>
