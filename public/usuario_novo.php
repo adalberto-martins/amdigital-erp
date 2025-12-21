@@ -1,9 +1,5 @@
 <?php
-require "../app/auth/verifica_login.php";
-if ($_SESSION['usuario_nivel'] !== 'admin') {
-    header("Location: dashboard.php");
-    exit;
-}
+require __DIR__ . "/../app/auth/seguranca.php";
 ?>
 
 <!DOCTYPE html>
