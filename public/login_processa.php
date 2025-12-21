@@ -23,7 +23,7 @@ if ($usuario) {
     $_SESSION['usuario_id'] = $usuario['id'];
     $_SESSION['usuario_nome'] = $usuario['nome'];
 
-    header("Location: dashboard.php");
+    header("Location: index.php");
     exit;
 } else {
     // Login inválido
