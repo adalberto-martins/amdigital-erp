@@ -1,5 +1,5 @@
 <?php
-require "../app/auth/verifica_login.php";
+require __DIR__ . "/../app/auth/seguranca.php";
 require "../config/database.php";
 
 $id = $_GET['id'] ?? null;
