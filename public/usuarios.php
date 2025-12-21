@@ -1,15 +1,5 @@
 <?php
-require "../app/auth/verifica_login.php";
-
-// Somente admin
-if ($_SESSION['usuario_nivel'] !== 'admin') {
-    header("Location: dashboard.php");
-    exit;
-}
-
-require "../config/database.php";
-
-$usuarios = $pdo->query("SELECT id, nome, email, nivel, status FROM usuarios ORDER BY nome")->fetchAll();
+require __DIR__ . "/../app/auth/seguranca.php";
 ?>
 
 <!DOCTYPE html>
