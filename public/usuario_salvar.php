@@ -1,11 +1,7 @@
 <?php
-require "../app/auth/verifica_login.php";
-if ($_SESSION['usuario_nivel'] !== 'admin') {
-    header("Location: dashboard.php");
-    exit;
-}
+require __DIR__ . "/../app/auth/seguranca.php";
 
-require "../config/database.php";
+
 
 $nome   = $_POST['nome'] ?? '';
 $email  = $_POST['email'] ?? '';
@@ -19,6 +15,7 @@ if ($nome === '' || $email === '' || $senha === '') {
 }
 
 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+
 
 $sql = "INSERT INTO usuarios (nome, email, senha, nivel, status)
         VALUES (?, ?, ?, ?, ?)";
