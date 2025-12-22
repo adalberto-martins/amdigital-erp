@@ -62,6 +62,10 @@ $financeiro = $stmt->fetchAll();
     <td><?= htmlspecialchars($f['status']) ?></td>
     <td>
         <a href="financeiro_editar.php?id=<?= $f['id'] ?>">✏️ Editar</a>
+        <a href="financeiro_excluir.php?id=<?= $f['id'] ?>"
+   onclick="return confirm('Deseja excluir este lançamento?')">
+   🗑 Excluir
+</a>
     </td>
 </tr>
 <?php endforeach; ?>
