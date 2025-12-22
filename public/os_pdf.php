@@ -80,4 +80,6 @@ $pdf->SetFont('Arial','I',10);
 $pdf->Cell(0,10,'Documento gerado pelo sistema AMDigital ERP',0,1,'C');
 
 // Saída
-$pdf->Output();
+$pdf->Output('I', 'OS_'.$os['id'].'.pdf');
+
+
