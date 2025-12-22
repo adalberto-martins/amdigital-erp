@@ -2,6 +2,23 @@
 require __DIR__ . "/../app/auth/seguranca.php";
 ?>
 
+<?php
+// ORDEM DE SERVIÇO - INDICADORES
+$totalOS = $pdo->query("SELECT COUNT(*) FROM ordens_servico")->fetchColumn();
+
+$osAbertas = $pdo->query("
+    SELECT COUNT(*) FROM ordens_servico WHERE status = 'aberta'
+")->fetchColumn();
+
+$osExecutando = $pdo->query("
+    SELECT COUNT(*) FROM ordens_servico WHERE status = 'executando'
+")->fetchColumn();
+
+$osConcluidas = $pdo->query("
+    SELECT COUNT(*) FROM ordens_servico WHERE status = 'concluida'
+")->fetchColumn();
+?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -81,6 +98,46 @@ footer {
     text-align: center;
     color: #777;
 }
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.08);
+    transition: .2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+}
+
+.card .big {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.card small {
+    color: #6b7280;
+}
+
+.card a {
+    display: inline-block;
+    margin-top: 12px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
 </style>
 </head>
 
@@ -139,6 +196,26 @@ footer {
         <p>Encerrar sessão do sistema.</p>
         <a href="logout.php">Logout</a>
     </div>
+
+    <div class="card">
+        <h3>Ordens de Serviço</h3>
+
+        <div class="big"><?= $totalOS ?></div>
+        <small>Total cadastradas</small>
+
+        <hr>
+
+        <small>
+            🟦 Abertas: <?= $osAbertas ?><br>
+            🟨 Executando: <?= $osExecutando ?><br>
+            🟩 Concluídas: <?= $osConcluidas ?>
+        </small>
+
+        <a href="ordens_servico.php">➡ Acessar OS</a>
+    </div>
+
+</div>
+
 
 </div>
 
