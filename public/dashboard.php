@@ -163,7 +163,7 @@ foreach ($lucroMensal as $l) {
     <a href="projetos.php">Projetos</a> |
     <a href="financeiro.php">Financeiro</a> |
     <a href="custos.php">Custos</a> |
-    <a href="logout.php">Sair</a>
+    <a href="index.php">Sair</a>
 </nav>
 
 <script>
