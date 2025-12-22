@@ -22,10 +22,15 @@ $clientes = $stmt->fetchAll();
 
 <table border="1" cellpadding="8" cellspacing="0" style="margin-top:10px;">
     <tr>
+        <th>Id</th>
         <th>Nome</th>
+        <th>CPF / CNPJ</th>
+        <th>Endereço</th>
         <th>Email</th>
         <th>Telefone</th>
+        <th>Observações</th>
         <th>Status</th>
+        <th>Criado em</th>
         <th>Ações</th>
     </tr>
 
@@ -36,12 +41,22 @@ $clientes = $stmt->fetchAll();
     <?php else: ?>
         <?php foreach ($clientes as $c): ?>
         <tr>
+            <td><?= htmlspecialchars($c['id']) ?></td>
             <td><?= htmlspecialchars($c['nome']) ?></td>
+            <td><?= htmlspecialchars(($c['cpf_cnpj'] ?? '')) ?></td>
+            <td><?= htmlspecialchars($c['endereco'] ?? '') ?></td>
             <td><?= htmlspecialchars($c['email']) ?></td>
             <td><?= htmlspecialchars($c['telefone']) ?></td>
+            <td><?= htmlspecialchars($c['observacoes'] ?? '') ?></td>
             <td><?= htmlspecialchars($c['status']) ?></td>
+            <td><?= htmlspecialchars($c['criado_em']) ?></td>
+            
             <td>
                 <a href="cliente_editar.php?id=<?= $c['id'] ?>">✏️ Editar</a>
+                <a href="cliente_excluir.php?id=<?= $c['id'] ?>"
+   onclick="return confirm('Deseja excluir este cliente?')">
+   🗑 Excluir
+</a>
             </td>
         </tr>
         <?php endforeach; ?>
