@@ -55,6 +55,11 @@ $projetos = $stmt->fetchAll();
     <td><?= htmlspecialchars($p['status']) ?></td>
     <td>
         <a href="projeto_editar.php?id=<?= $p['id'] ?>">✏️ Editar</a>
+        <a href="projeto_excluir.php?id=<?= $p['id'] ?>"
+   onclick="return confirm('Deseja excluir este projeto?')">
+   🗑 Excluir
+</a>
+
     </td>
 </tr>
 <?php endforeach; ?>
