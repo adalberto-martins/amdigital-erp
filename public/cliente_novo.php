@@ -19,7 +19,7 @@ require __DIR__ . "/../app/auth/seguranca.php";
     <input type="text" name="nome" required><br><br>
 
     <label>CPF / CNPJ:</label><br>
-    <input type="text"><br><br>
+    <input type="text" name="cpf_cnpj"><br><br>
 
     <label>Endereço:</label><br>
     <input type="text" name="endereco"><br><br>
@@ -31,7 +31,7 @@ require __DIR__ . "/../app/auth/seguranca.php";
     <input type="text" name="telefone"><br><br>
 
     <labe>Observações</label><br>
-    <textarea name="" id=""></textarea><br><br>
+    <textarea name="observacoes"></textarea><br><br>
 
     <label>Status</label><br>
     <select name="status">
