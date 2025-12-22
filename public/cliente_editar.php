@@ -35,11 +35,20 @@ if (!$cliente) {
     <label>Nome</label><br>
     <input type="text" name="nome" required value="<?= htmlspecialchars($cliente['nome']) ?>"><br><br>
 
+    <label>CPF / CNPJ</label><br>
+    <input type="text" name="cpf_cnpj" value="<?= htmlspecialchars($cliente['cpf_cnpj'] ?? '') ?>"><br><br>
+    
+    <label>Endereço</label><br>
+    <input type="text" name="endereco" value="<?= htmlspecialchars($cliente['endereco'] ?? '') ?>"><br><br>
+
     <label>Email</label><br>
     <input type="email" name="email" value="<?= htmlspecialchars($cliente['email']) ?>"><br><br>
 
     <label>Telefone</label><br>
     <input type="text" name="telefone" value="<?= htmlspecialchars($cliente['telefone']) ?>"><br><br>
+
+    <label>Observações</label><br>
+    <textarea name="observacoes" value="<?= htmlspecialchars($cliente['observacoes'] ?? '') ?>"></textarea><br><br>
 
     <label>Status</label><br>
     <select name="status">
