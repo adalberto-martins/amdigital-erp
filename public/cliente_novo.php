@@ -14,14 +14,24 @@ require __DIR__ . "/../app/auth/seguranca.php";
 
 <form method="post" action="cliente_salvar.php">
 
-    <label>Nome</label><br>
+    
+    <label>Nome:</label><br>
     <input type="text" name="nome" required><br><br>
 
-    <label>Email</label><br>
+    <label>CPF / CNPJ:</label><br>
+    <input type="text"><br><br>
+
+    <label>Endereço:</label><br>
+    <input type="text" name="endereco"><br><br>
+
+    <label>Email:</label><br>
     <input type="email" name="email"><br><br>
 
-    <label>Telefone</label><br>
+    <label>Telefone:</label><br>
     <input type="text" name="telefone"><br><br>
+
+    <labe>Observações</label><br>
+    <textarea name="" id=""></textarea><br><br>
 
     <label>Status</label><br>
     <select name="status">
