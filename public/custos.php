@@ -45,6 +45,10 @@ $custos = $stmt->fetchAll();
     <td><?= $c['recorrente'] === 'sim' ? 'Sim' : 'Não' ?></td>
     <td>
         <a href="custo_editar.php?id=<?= $c['id'] ?>">✏️ Editar</a>
+        <a href="custo_excluir.php?id=<?= $c['id'] ?>"
+   onclick="return confirm('Deseja excluir este custo?')">
+   🗑 Excluir
+</a>
     </td>
 </tr>
 <?php endforeach; ?>
