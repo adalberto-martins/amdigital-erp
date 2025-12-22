@@ -12,7 +12,7 @@ $clientes = $stmt->fetchAll();
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Clientes</title>
+    <title>Clientes</title>    
 </head>
 <body>
 
