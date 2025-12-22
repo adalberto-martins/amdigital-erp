@@ -117,13 +117,13 @@ $ordens = $pdo->query($sql)->fetchAll();
     <td>
         <?= date('d/m/Y H:i', strtotime($os['criado_em'])) ?>
     </td>
-  <td>
+<td>
     <a href="os_editar.php?id=<?= $os['id'] ?>">✏️</a>
+    <a href="os_pdf.php?id=<?= $os['id'] ?>" target="_blank">📄</a>
     <a href="os_excluir.php?id=<?= $os['id'] ?>"
-       onclick="return confirm('Deseja excluir esta ordem de serviço?')">
-       🗑
-    </a>
+       onclick="return confirm('Deseja excluir esta OS?')">🗑</a>
 </td>
+
 
 </tr>
 <?php endforeach; ?>
