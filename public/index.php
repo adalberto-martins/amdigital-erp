@@ -27,17 +27,28 @@ $osConcluidas = $pdo->query("
 // PROJETOS - INDICADORES
 $totalProjetos = $pdo->query("SELECT COUNT(*) FROM projetos")->fetchColumn();
 
-$projetosOrcamentos = $pdo->query("
-    SELECT COUNT(*) FROM ordens_servico WHERE status = 'orcamento'
+$emAndamento = $pdo->query("
+    SELECT COUNT(*) FROM projetos WHERE status = 'em_andamento'
 ")->fetchColumn();
 
-$projetosEm_Andamento = $pdo->query("
-    SELECT COUNT(*) FROM ordens_servico WHERE status = 'andamento'
+$concluidos = $pdo->query("
+    SELECT COUNT(*) FROM projetos WHERE status = 'concluido'
 ")->fetchColumn();
 
-$projetosFinalizado = $pdo->query("
-    SELECT COUNT(*) FROM ordens_servico WHERE status = 'finalizado'
+$cancelados = $pdo->query("
+    SELECT COUNT(*) FROM projetos WHERE status = 'cancelado'
 ")->fetchColumn();
+$valorTotal = $pdo->query("
+    SELECT COALESCE(SUM(valor),0) FROM projetos
+")->fetchColumn();
+
+$valorEmAndamento = $pdo->query("
+    SELECT COALESCE(SUM(valor),0)
+    FROM projetos
+    WHERE status = 'em_andamento'
+")->fetchColumn();
+
+
 
 // ===============================
 // INDICADORES - FINANCEIRO
@@ -378,9 +389,11 @@ footer {
         <hr>
 
         <small>
-            🟦 Orçamentos: <?= $projetosOrcamentos ?><br>
-            🟨 Em andamento: <?= $osExecutando ?><br>
-            🟩 Finalizado: <?= $osConcluidas ?>
+            🟦 Em Andamento: <?= $emAndamento ?><br>
+            🟩 Concluidos: <?= $concluidos ?><br>
+            🟥 Cancelados: <?= $cancelados ?><br>
+            Valor Total em Projeto: R$ <?= number_format($valorTotal,2,',','.')?><br>
+            Valor em Andamento: R$ <?= number_format($valorEmAndamento,2,',','.') ?>
         </small>
 
         <a href="projetos.php">➡ Acessar Projetos 📁</a>
