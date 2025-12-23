@@ -3,19 +3,17 @@ require __DIR__ . "/../app/auth/seguranca.php";
 require "../config/database.php";
 
 $id = $_GET['id'] ?? null;
+
 if (!$id) {
-    header("Location: clientes.php");
-    exit;
+    die("Cliente não informado");
 }
 
-$sql = "SELECT * FROM clientes WHERE id = ?";
-$stmt = $pdo->prepare($sql);
+$stmt = $pdo->prepare("SELECT * FROM clientes WHERE id = ?");
 $stmt->execute([$id]);
 $cliente = $stmt->fetch();
 
 if (!$cliente) {
-    header("Location: clientes.php");
-    exit;
+    die("Cliente não encontrado");
 }
 ?>
 
@@ -33,7 +31,7 @@ if (!$cliente) {
     <input type="hidden" name="id" value="<?= $cliente['id'] ?>">
 
     <label>Nome</label><br>
-    <input type="text" name="nome" required value="<?= htmlspecialchars($cliente['nome']) ?>"><br><br>
+    <input type="text" name="nome" value="<?= htmlspecialchars($cliente['nome']) ?>" required value="<?= htmlspecialchars($cliente['nome']) ?>"><br><br>
 
     <label>CPF / CNPJ</label><br>
     <input type="text" name="cpf_cnpj" value="<?= htmlspecialchars($cliente['cpf_cnpj'] ?? '') ?>"><br><br>
