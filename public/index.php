@@ -14,7 +14,7 @@ $osAbertas = $pdo->query("
 ")->fetchColumn();
 
 $osExecutando = $pdo->query("
-    SELECT COUNT(*) FROM ordens_servico WHERE status = 'executando'
+    SELECT COUNT(*) FROM ordens_servico WHERE status = 'em_execucao'
 ")->fetchColumn();
 
 $osCanceladas= $pdo->query("
@@ -493,7 +493,7 @@ footer {
             <hr>
 
             <small>
-                🟦 Abertas: <?= $osAbertas ?><br>
+                🟦 Abertas:    <?= $osAbertas    ?><br>
                 🟨 Executando: <?= $osExecutando ?><br>
                 🟥 Canceladas: <?= $osCanceladas ?><br>
                 🟩 Concluídas: <?= $osConcluidas ?>
