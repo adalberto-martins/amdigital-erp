@@ -1,8 +1,11 @@
 <?php
 require __DIR__ . "/../app/auth/seguranca.php";
-?>
+require __DIR__ . "/../config/database.php";
 
-<?php
+// GARANTIA DEFENSIVA (pode remover depois)
+if (!isset($pdo)) {
+    die("Erro crítico: conexão com banco não encontrada.");
+}
 // ORDEM DE SERVIÇO - INDICADORES
 $totalOS = $pdo->query("SELECT COUNT(*) FROM ordens_servico")->fetchColumn();
 
@@ -14,9 +17,194 @@ $osExecutando = $pdo->query("
     SELECT COUNT(*) FROM ordens_servico WHERE status = 'executando'
 ")->fetchColumn();
 
+$osCanceladas= $pdo->query("
+    SELECT COUNT(*) FROM ordens_servico WHERE status = 'cancelada'
+")->fetchColumn();
+
 $osConcluidas = $pdo->query("
     SELECT COUNT(*) FROM ordens_servico WHERE status = 'concluida'
 ")->fetchColumn();
+// PROJETOS - INDICADORES
+$totalProjetos = $pdo->query("SELECT COUNT(*) FROM projetos")->fetchColumn();
+
+$projetosOrcamentos = $pdo->query("
+    SELECT COUNT(*) FROM ordens_servico WHERE status = 'orcamento'
+")->fetchColumn();
+
+$projetosEm_Andamento = $pdo->query("
+    SELECT COUNT(*) FROM ordens_servico WHERE status = 'andamento'
+")->fetchColumn();
+
+$projetosFinalizado = $pdo->query("
+    SELECT COUNT(*) FROM ordens_servico WHERE status = 'finalizado'
+")->fetchColumn();
+
+// ===============================
+// INDICADORES - FINANCEIRO
+// ===============================
+
+// A RECEBER (pendente)
+$totalReceber = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM financeiro
+    WHERE tipo = 'receber' AND status = 'pendente'
+")->fetchColumn();
+
+// A PAGAR (pendente)
+$totalPagar = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM financeiro
+    WHERE tipo = 'pagar' AND status = 'pendente'
+")->fetchColumn();
+
+// RECEBIDO
+$totalRecebido = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM financeiro
+    WHERE tipo = 'receber' AND status = 'pago'
+")->fetchColumn();
+
+// PAGO
+$totalPago = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM financeiro
+    WHERE tipo = 'pagar' AND status = 'pago'
+")->fetchColumn();
+
+$receberVencido = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM financeiro
+    WHERE tipo = 'receber'
+      AND status = 'pendente'
+      AND vencimento < CURDATE()
+")->fetchColumn();
+
+// A PAGAR VENCIDOS
+$pagarVencido = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM financeiro
+    WHERE tipo = 'pagar'
+      AND status = 'pendente'
+      AND vencimento < CURDATE()
+")->fetchColumn();
+
+// SALDO ATUAL
+$saldoAtual = ($totalReceber + $totalRecebido) - ($totalPagar + $totalPago);
+
+// ===============================
+// INDICADORES - CUSTOS
+// ===============================
+
+// TOTAL DE CUSTOS
+$totalCustos = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM custos
+")->fetchColumn();
+
+// CUSTOS FIXOS
+$custosFixos = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM custos
+    WHERE tipo = 'fixo'
+")->fetchColumn();
+
+// CUSTOS VARIÁVEIS
+$custosVariaveis = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM custos
+    WHERE tipo = 'variavel'
+")->fetchColumn();
+
+// CUSTOS DO MÊS ATUAL
+$custosMes = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM custos
+    WHERE MONTH(data) = MONTH(CURDATE())
+      AND YEAR(data) = YEAR(CURDATE())
+")->fetchColumn();
+
+// CUSTOS VENCIDOS (DATA MENOR QUE HOJE)
+$custosVencidos = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM custos
+    WHERE data < CURDATE()
+")->fetchColumn();
+
+// ===============================
+// INDICADORES - CLIENTES
+// ===============================
+
+// TOTAL DE CLIENTES
+$totalClientes = $pdo->query("
+    SELECT COUNT(*) FROM clientes
+")->fetchColumn();
+
+// CLIENTES ATIVOS
+$clientesAtivos = $pdo->query("
+    SELECT COUNT(*) FROM clientes
+    WHERE status = 'ativo'
+")->fetchColumn();
+
+// CLIENTES INATIVOS
+$clientesInativos = $pdo->query("
+    SELECT COUNT(*) FROM clientes
+    WHERE status = 'inativo'
+")->fetchColumn();
+
+// CLIENTES COM OS ABERTA
+$clientesComOS = $pdo->query("
+    SELECT COUNT(DISTINCT cliente_id)
+    FROM ordens_servico
+    WHERE status IN ('aberta','executando')
+")->fetchColumn();
+
+// ===============================
+// DASHBOARD - VISÃO GERAL
+// ===============================
+
+// CLIENTES ATIVOS
+$clientesAtivos = $pdo->query("
+    SELECT COUNT(*) FROM clientes WHERE status = 'ativo'
+")->fetchColumn();
+
+// OS EM ANDAMENTO
+$osEmAndamento = $pdo->query("
+    SELECT COUNT(*) FROM ordens_servico
+    WHERE status IN ('aberta','executando')
+")->fetchColumn();
+
+// RECEITA EM ABERTO
+$receitaAberta = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM financeiro
+    WHERE tipo = 'receber' AND status = 'pendente'
+")->fetchColumn();
+
+// CUSTOS DO MÊS
+$custosMes = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM custos
+    WHERE MONTH(data) = MONTH(CURDATE())
+      AND YEAR(data) = YEAR(CURDATE())
+")->fetchColumn();
+
+// SALDO ATUAL
+$saldoAtual = $pdo->query("
+    SELECT
+      (SELECT IFNULL(SUM(valor),0) FROM financeiro WHERE tipo='receber')
+    - (SELECT IFNULL(SUM(valor),0) FROM financeiro WHERE tipo='pagar')
+")->fetchColumn();
+
+// LUCRO ESTIMADO DO MÊS
+$receitaMes = $pdo->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM financeiro
+    WHERE tipo='receber'
+      AND MONTH(vencimento)=MONTH(CURDATE())
+      AND YEAR(vencimento)=YEAR(CURDATE())
+")->fetchColumn();
+
+$lucroMes = $receitaMes - $custosMes;
 ?>
 
 <!DOCTYPE html>
@@ -138,6 +326,15 @@ footer {
     font-weight: bold;
 }
 
+.card-clientes   { border-left: 5px solid #3b82f6; } /* azul */
+.card-projetos   { border-left: 5px solid #8b5cf6; } /* roxo */
+.card-os         { border-left: 5px solid #2563eb; } /* azul forte */
+.card-financeiro { border-left: 5px solid #16a34a; } /* verde */
+.card-custos     { border-left: 5px solid #dc2626; } /* vermelho */
+.card-usuarios   { border-left: 5px solid #374151; } /* cinza */
+.card-dashboard  { border-left: 5px solid #0ea5e9; } /* azul neutro */
+.card-sair       { border-left: 5px solid #b91c1c; } /* vermelho escuro */
+
 </style>
 </head>
 
@@ -155,67 +352,152 @@ footer {
 
 <div class="cards">
 
-    <div class="card">
+    <div class="card card-clientes">
         <h3>👥 Clientes</h3>
-        <p>Cadastro e gerenciamento de clientes.</p>
-        <a href="clientes.php">Acessar</a>
+
+        <div class="big"><?= $totalClientes ?></div>
+        <small>Total cadastrados</small>
+
+        <hr>
+
+        <small>
+            ✅ Ativos: <?= $clientesAtivos ?><br>
+            ⛔ Inativos: <?= $clientesInativos ?><br>
+            🧾 Com OS ativa: <?= $clientesComOS ?>
+        </small>
+
+        <a href="clientes.php">➡ Acessar Clientes 👥</a>
     </div>
 
-    <div class="card">
+    <div class="card card-projetos">
         <h3>📁 Projetos</h3>
-        <p>Projetos vinculados aos clientes.</p>
-        <a href="projetos.php">Acessar</a>
-    </div>
 
-    <div class="card">
-        <h3>💰 Financeiro</h3>
-        <p>Contas a pagar e receber.</p>
-        <a href="financeiro.php">Acessar</a>
-    </div>
-
-    <div class="card">
-        <h3>🧾 Custos</h3>
-        <p>Controle de custos fixos e variáveis.</p>
-        <a href="custos.php">Acessar</a>
-    </div>
-
-    <div class="card">
-        <h3>📊 Dashboard</h3>
-        <p>Indicadores, lucros e gráficos.</p>
-        <a href="dashboard.php">Acessar</a>
-    </div>
-
-    <div class="card">
-        <h3>👤 Usuários</h3>
-        <p>Gerenciamento de usuários do sistema.</p>
-        <a href="usuarios.php">Acessar</a>
-    </div>
-
-    <div class="card">
-        <h3>🚪 Sair</h3>
-        <p>Encerrar sessão do sistema.</p>
-        <a href="logout.php">Logout</a>
-    </div>
-
-    <div class="card">
-        <h3>Ordens de Serviço</h3>
-
-        <div class="big"><?= $totalOS ?></div>
+        <div class="big"><?= $totalProjetos ?></div>
         <small>Total cadastradas</small>
 
         <hr>
 
         <small>
-            🟦 Abertas: <?= $osAbertas ?><br>
-            🟨 Executando: <?= $osExecutando ?><br>
-            🟩 Concluídas: <?= $osConcluidas ?>
+            🟦 Orçamentos: <?= $projetosOrcamentos ?><br>
+            🟨 Em andamento: <?= $osExecutando ?><br>
+            🟩 Finalizado: <?= $osConcluidas ?>
         </small>
 
-        <a href="ordens_servico.php">➡ Acessar OS</a>
+        <a href="projetos.php">➡ Acessar Projetos 📁</a>
     </div>
 
-</div>
+    <div class="card card-financeiro">
+        <h3>💰 Financeiro</h3>
 
+        <div class="big">
+            R$ <?= number_format($saldoAtual, 2, ',', '.') ?>
+        </div>
+        <small>Saldo atual</small>
+
+        <hr>
+
+        <small>
+            💵 A Receber: R$ <?= number_format($totalReceber, 2, ',', '.') ?><br>
+            💸 A Pagar: R$ <?= number_format($totalPagar, 2, ',', '.') ?><br>
+
+            ⏰ Receber Vencido:
+                <strong style="color:#dc2626">
+                    R$ <?= number_format($receberVencido, 2, ',', '.') ?>
+                </strong><br>
+
+            ⏰ Pagar Vencido:
+                <strong style="color:#dc2626">
+                    R$ <?= number_format($pagarVencido, 2, ',', '.') ?>
+                </strong><br>
+
+            ✅ Recebido: R$ <?= number_format($totalRecebido, 2, ',', '.') ?><br>
+            ❌ Pago: R$ <?= number_format($totalPago, 2, ',', '.') ?>
+
+        </small>
+
+        <a href="financeiro.php">➡ Acessar 💰</a>
+    </div>
+
+
+    <div class="card card-custos">
+        <h3>🧾 Custos</h3>
+
+        <div class="big">
+            R$ <?= number_format($totalCustos, 2, ',', '.') ?>
+        </div>
+        <small>Total de custos</small>
+
+        <hr>
+
+        <small>
+            💸 Fixos: R$ <?= number_format($custosFixos, 2, ',', '.') ?><br>
+            🔀 Variáveis: R$ <?= number_format($custosVariaveis, 2, ',', '.') ?><br>
+            📆 Mês atual: R$ <?= number_format($custosMes, 2, ',', '.') ?><br>
+
+            ⏰ Vencidos:
+            <strong style="color:#dc2626">
+                R$ <?= number_format($custosVencidos, 2, ',', '.') ?>
+            </strong>
+        </small>
+
+        <a href="custos.php">➡ Acessar Custos 🧾</a>
+    </div>
+
+
+    <div class="card card-dashboard">
+        <h3>📊 Visão Geral</h3>
+
+        <div class="big">
+            R$ <?= number_format($saldoAtual, 2, ',', '.') ?>
+        </div>
+        <small>Saldo atual da empresa</small>
+
+        <hr>
+
+        <small>
+            👥 Clientes ativos: <?= $clientesAtivos ?><br>
+            🧾 OS em andamento: <?= $osEmAndamento ?><br>
+            💵 Receita em aberto: R$ <?= number_format($receitaAberta,2,',','.') ?><br>
+            💸 Custos do mês: R$ <?= number_format($custosMes,2,',','.') ?><br>
+            📈 Lucro estimado (mês): 
+            <strong><?= number_format($lucroMes,2,',','.') ?></strong>
+        </small>
+    </div>
+
+
+        <div class="card card-usuarios">
+            <h3>👤 Usuários</h3>
+            <p>Gerenciamento de usuários do sistema.</p>
+            <a href="usuarios.php">➡ Acessar 👤</a>
+        </div>
+
+            <div class="card card-os">
+            <h3>⚙️ Ordens de Serviço</h3>
+
+            <div class="big"><?= $totalOS ?></div>
+            <small>Total cadastradas</small>
+
+            <hr>
+
+            <small>
+                🟦 Abertas: <?= $osAbertas ?><br>
+                🟨 Executando: <?= $osExecutando ?><br>
+                🟥 Canceladas: <?= $osCanceladas ?><br>
+                🟩 Concluídas: <?= $osConcluidas ?>
+            </small>
+
+            <a href="ordens_servico.php">➡ Acessar ⚙️</a>
+        </div>
+
+        <div class="card card-sair">
+            <h3>🚪 Sair</h3>
+            <p>Encerrar sessão do sistema.</p>
+            <a href="logout.php"
+    onclick="return confirm('Deseja realmente sair do sistema?')">➡ Logout 🚪</a>
+
+        </div>
+
+</div>
 
 </div>
 
@@ -227,4 +509,3 @@ footer {
 
 </body>
 </html>
-
