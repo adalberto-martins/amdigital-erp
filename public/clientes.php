@@ -12,7 +12,61 @@ $clientes = $stmt->fetchAll();
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Clientes</title>    
+    <title>Clientes</title>
+    
+    <style>
+    .table-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,.08);
+    }
+
+    .system-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .system-table th {
+        background: #f1f5f9;
+        padding: 10px;
+        text-align: left;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .system-table td {
+        padding: 10px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .badge-aberta {
+        background: #e0f2fe;
+        color: #075985;
+    }
+
+    .badge-executando {
+        background: #fef9c3;
+        color: #854d0e;
+    }
+
+    .badge-concluida {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-cancelada {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+</style>
 </head>
 <body>
 
