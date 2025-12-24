@@ -502,11 +502,38 @@ footer {
             <a href="ordens_servico.php">➡ Acessar ⚙️</a>
         </div>
 
+        <div class="card card-dashboard">
+            <h3>📊 Dashbord Principal</h3>
+            
+            <div class="big">
+                <p>Indicadores do sistema.</p>
+            </div>
+
+            <hr>
+
+            <small>
+            👥 Clientes ativos: <?= $clientesAtivos ?><br>
+            🧾 OS em Execução: <?= $osExecutando  ?><br>
+            💵 Receita em aberto: R$ <?= number_format($receitaAberta,2,',','.') ?><br>
+            💸 Custos do mês: R$ <?= number_format($custosMes,2,',','.') ?><br>
+            📈 Lucro estimado (mês): 
+            <strong><?= number_format($lucroMes,2,',','.') ?></strong>
+        </small>
+            <a href="dashboard.php">➡ Acessar</a>
+        </div>
+
+        <div class="card">
+            <h3>Orçamento</h3>
+            <p>Calcular valores.</p>
+            <a href="orcamentos.php">➡ Acessar</a>
+
+        </div>
+
         <div class="card card-sair">
             <h3>🚪 Sair</h3>
             <p>Encerrar sessão do sistema.</p>
             <a href="logout.php"
-    onclick="return confirm('Deseja realmente sair do sistema?')">➡ Logout 🚪</a>
+            onclick="return confirm('Deseja realmente sair do sistema?')">➡ Logout 🚪</a>
 
         </div>
 
