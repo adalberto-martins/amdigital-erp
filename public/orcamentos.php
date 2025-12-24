@@ -8,20 +8,38 @@ $orcamentos = $pdo->query("
     LEFT JOIN clientes c ON c.id = o.cliente_id
     ORDER BY o.id DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
+
+function corStatus($status) {
+    return match($status) {
+        'rascunho'   => '#64748b',
+        'enviado'    => '#2563eb',
+        'aprovado'   => '#16a34a',
+        'convertido' => '#0f766e',
+        'rejeitado'  => '#dc2626',
+        default      => '#475569'
+    };
+}
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <title>Orçamentos</title>
+<link rel="stylesheet" href="../assets/css/system.css">
+
+
 </head>
 <body>
 
 <h1>Orçamentos</h1>
 
-<a href="orcamento_novo.php">➕ Novo Orçamento</a>
+<div class="botoes">
+    <a href="orcamento_novo.php">➕ Novo Orçamento</a>
+    <a href="index.php">⬅ Dashboard</a>
+</div>
 
-<table border="1" width="100%">
+<table class="system-table">
+<thead>
 <tr>
     <th>ID</th>
     <th>Cliente</th>
@@ -30,18 +48,23 @@ $orcamentos = $pdo->query("
     <th>Lucro</th>
     <th>Margem</th>
 </tr>
+</thead>
+<tbody>
 
 <?php foreach ($orcamentos as $o): ?>
 <tr onclick="location.href='orcamento_editar.php?id=<?= $o['id'] ?>'">
     <td><?= $o['id'] ?></td>
     <td><?= htmlspecialchars($o['cliente'] ?? '—') ?></td>
-    <td><?= strtoupper($o['status']) ?></td>
+    <td style="color:<?= corStatus($o['status']) ?>; font-weight:bold;">
+        <?= strtoupper($o['status']) ?>
+    </td>
     <td>R$ <?= number_format($o['valor_estimado'],2,',','.') ?></td>
     <td>R$ <?= number_format($o['lucro_estimado'],2,',','.') ?></td>
     <td><?= number_format($o['margem_estimada'],2,',','.') ?>%</td>
 </tr>
 <?php endforeach; ?>
 
+</tbody>
 </table>
 
 </body>

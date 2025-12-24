@@ -23,6 +23,8 @@ $clientes = $pdo->query("SELECT id,nome FROM clientes WHERE status='ativo'")->fe
 <head>
 <meta charset="UTF-8">
 <title>Editar Orçamento</title>
+<link rel="stylesheet" href="../assets/css/system.css">
+
 </head>
 <body>
 

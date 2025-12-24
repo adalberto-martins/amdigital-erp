@@ -2,16 +2,30 @@
 require __DIR__ . "/../app/auth/seguranca.php";
 require __DIR__ . "/../config/database.php";
 
-$id = $_POST['id'];
+$id = $_POST['id'] ?? null;
+if (!$id) die("ID inválido");
 
-$valor = $_POST['valor_estimado'] ?? null;
+// buscar orçamento atual
+$stmt = $pdo->prepare("SELECT valor_estimado FROM orcamentos WHERE id=?");
+$stmt->execute([$id]);
+$orcamentoAtual = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// recalcula custo médio (mesma regra do dashboard)
-$totalCustos = $pdo->query("SELECT COALESCE(SUM(valor),0) FROM custos")->fetchColumn();
-$totalProjetos = $pdo->query("SELECT COUNT(*) FROM projetos")->fetchColumn();
-$custoEstimado = $totalProjetos > 0 ? $totalCustos / $totalProjetos : 0;
+if (!$orcamentoAtual) die("Orçamento não encontrado");
 
-$lucro = $valor - $custoEstimado;
+$valor = (float)$orcamentoAtual['valor_estimado'];
+
+// custo médio (mesma lógica do dashboard)
+$totalCustos = $pdo->query("
+    SELECT COALESCE(SUM(valor),0) FROM custos
+")->fetchColumn();
+
+$totalProjetos = $pdo->query("
+    SELECT COUNT(*) FROM projetos
+")->fetchColumn();
+
+$custoEstimado = $totalProjetos > 0 ? ($totalCustos / $totalProjetos) : 0;
+
+$lucro  = $valor - $custoEstimado;
 $margem = $valor > 0 ? ($lucro / $valor) * 100 : 0;
 
 $stmt = $pdo->prepare("
@@ -42,3 +56,5 @@ $stmt->execute([
 ]);
 
 header("Location: orcamentos.php");
+exit;
+
