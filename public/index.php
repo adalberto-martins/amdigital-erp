@@ -345,6 +345,7 @@ footer {
 .card-usuarios   { border-left: 5px solid #374151; } /* cinza */
 .card-dashboard  { border-left: 5px solid #0ea5e9; } /* azul neutro */
 .card-sair       { border-left: 5px solid #b91c1c; } /* vermelho escuro */
+.card-orcamento  { border-left: 5px solid #f97316; } /* laranja */
 
 </style>
 </head>
@@ -428,7 +429,7 @@ footer {
 
         </small>
 
-        <a href="financeiro.php">➡ Acessar 💰</a>
+        <a href="financeiro.php">➡ Acessar Financeiro💰</a>
     </div>
 
 
@@ -475,67 +476,78 @@ footer {
             📈 Lucro estimado (mês): 
             <strong><?= number_format($lucroMes,2,',','.') ?></strong>
         </small>
+
+        <a href="">➡ Acessar Visão Geral 📊</a>
     </div>
 
 
-        <div class="card card-usuarios">
-            <h3>👤 Usuários</h3>
-            <p>Gerenciamento de usuários do sistema.</p>
-            <a href="usuarios.php">➡ Acessar 👤</a>
-        </div>
+    <div class="card card-usuarios">
+        <h3>👤 Usuários</h3>
+        <p>Gerenciamento de usuários do sistema.</p>
+        <a href="usuarios.php">➡ Acessar 👤</a>
+    </div>
 
-            <div class="card card-os">
-            <h3>⚙️ Ordens de Serviço</h3>
+        <div class="card card-os">
+        <h3>⚙️ Ordens de Serviço</h3>
 
-            <div class="big"><?= $totalOS ?></div>
-            <small>Total cadastradas</small>
+        <div class="big"><?= $totalOS ?></div>
+        <small>Total cadastradas</small>
 
-            <hr>
+        <hr>
 
-            <small>
-                🟦 Abertas:    <?= $osAbertas    ?><br>
-                🟨 Executando: <?= $osExecutando ?><br>
-                🟥 Canceladas: <?= $osCanceladas ?><br>
-                🟩 Concluídas: <?= $osConcluidas ?>
-            </small>
-
-            <a href="ordens_servico.php">➡ Acessar ⚙️</a>
-        </div>
-
-        <div class="card card-dashboard">
-            <h3>📊 Dashbord Principal</h3>
-            
-            <div class="big">
-                <p>Indicadores do sistema.</p>
-            </div>
-
-            <hr>
-
-            <small>
-            👥 Clientes ativos: <?= $clientesAtivos ?><br>
-            🧾 OS em Execução: <?= $osExecutando  ?><br>
-            💵 Receita em aberto: R$ <?= number_format($receitaAberta,2,',','.') ?><br>
-            💸 Custos do mês: R$ <?= number_format($custosMes,2,',','.') ?><br>
-            📈 Lucro estimado (mês): 
-            <strong><?= number_format($lucroMes,2,',','.') ?></strong>
+        <small>
+            🟦 Abertas:    <?= $osAbertas    ?><br>
+            🟨 Executando: <?= $osExecutando ?><br>
+            🟥 Canceladas: <?= $osCanceladas ?><br>
+            🟩 Concluídas: <?= $osConcluidas ?>
         </small>
-            <a href="dashboard.php">➡ Acessar</a>
+
+        <a href="ordens_servico.php">➡ Acessar ⚙️</a>
+    </div>
+
+    <div class="card card-dashboard">
+        <h3>📊 Dashbord Principal</h3>
+        
+        <div class="big">
+            <p>Indicadores do sistema.</p>
         </div>
 
-        <div class="card">
-            <h3>Orçamento</h3>
+        <hr>
+
+        <small>
+        👥 Clientes ativos: <?= $clientesAtivos ?><br>
+        🧾 OS em Execução: <?= $osExecutando  ?><br>
+        💵 Receita em aberto: R$ <?= number_format($receitaAberta,2,',','.') ?><br>
+        💸 Custos do mês: R$ <?= number_format($custosMes,2,',','.') ?><br>
+        📈 Lucro estimado (mês): 
+        <strong><?= number_format($lucroMes,2,',','.') ?></strong>
+    </small>
+        <a href="dashboard.php">➡ Acessar 📊</a>
+    </div>
+
+    <div class="card card-orcamento">
+        <h3>💲Orçamento</h3>
+
+        <div class="big">
             <p>Calcular valores.</p>
-            <a href="orcamentos.php">➡ Acessar</a>
-
         </div>
 
-        <div class="card card-sair">
-            <h3>🚪 Sair</h3>
-            <p>Encerrar sessão do sistema.</p>
-            <a href="logout.php"
-            onclick="return confirm('Deseja realmente sair do sistema?')">➡ Logout 🚪</a>
+        <hr>
 
-        </div>
+        <small>
+            Orçamento Aprovados:<?= $o ?><br>
+            
+        </small>
+            <a href="orcamentos.php">➡ Acessar Orçamento 💲</a>
+    </div>
+
+    <div class="card card-sair">
+        <h3>🚪 Sair</h3>
+        <p>Encerrar sessão do sistema.</p>
+        <a href="logout.php"
+        onclick="return confirm('Deseja realmente sair do sistema?')">➡ Logout 🚪</a>
+
+    </div>
 
 </div>
 
