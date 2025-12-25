@@ -110,7 +110,7 @@ input:focus {
             <div class="erro"><?= htmlspecialchars($erro) ?></div>
         <?php endif; ?>
 
-        <form method="post" action="login_processar.php">
+        <form method="post" action="login_processa.php">
 
             <label>E-mail</label>
             <input type="email" name="email" required>
