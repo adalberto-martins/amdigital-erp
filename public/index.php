@@ -214,6 +214,18 @@ $receitaMes = $pdo->query("
       AND MONTH(vencimento)=MONTH(CURDATE())
       AND YEAR(vencimento)=YEAR(CURDATE())
 ")->fetchColumn();
+// orcamentos
+$total_orcamentos = $pdo
+    ->query("SELECT COUNT(*) FROM orcamentos")->fetchColumn();
+    
+$orcamentos_aprovados = $pdo
+    ->query("SELECT COUNT(*) FROM orcamentos WHERE status = 'aprovado'")
+    ->fetchColumn();
+
+$orcamentos_rejeitados = $pdo
+    ->query("SELECT COUNT(*) FROM orcamentos WHERE status = 'rejeitados'")
+    ->fetchColumn();
+
 
 $lucroMes = $receitaMes - $custosMes;
 ?>
@@ -477,7 +489,7 @@ footer {
             <strong><?= number_format($lucroMes,2,',','.') ?></strong>
         </small>
 
-        <a href="">➡ Acessar Visão Geral 📊</a>
+        
     </div>
 
 
@@ -528,15 +540,14 @@ footer {
     <div class="card card-orcamento">
         <h3>💲Orçamento</h3>
 
-        <div class="big">
-            <p>Calcular valores.</p>
-        </div>
+        <div class="big"><?= $total_orcamentos  ?></div>
+            <small>Calcular valores</small>        
 
         <hr>
 
         <small>
-            Orçamento Aprovados:<?= $o ?><br>
-            
+            👍 Orçamento Aprovados:<?= $orcamentos_aprovados ?><br>
+            👎 Orçamento Rejeitados:<?= $orcamentos_rejeitados ?>            
         </small>
             <a href="orcamentos.php">➡ Acessar Orçamento 💲</a>
     </div>
