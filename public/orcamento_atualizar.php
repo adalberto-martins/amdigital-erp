@@ -1,60 +1,93 @@
 <?php
 require __DIR__ . "/../app/auth/seguranca.php";
 require __DIR__ . "/../config/database.php";
+require __DIR__ . "/../app/helpers/orcamento_helper.php";
+
+/* =========================
+   VALIDA POST
+========================= */
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: orcamentos.php");
+    exit;
+}
 
 $id = $_POST['id'] ?? null;
-if (!$id) die("ID inválido");
+$descricao = $_POST['descricao'] ?? '';
+$statusNovo = $_POST['status'] ?? '';
 
-// buscar orçamento atual
-$stmt = $pdo->prepare("SELECT valor_estimado FROM orcamentos WHERE id=?");
-$stmt->execute([$id]);
-$orcamentoAtual = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$id) {
+    header("Location: orcamentos.php");
+    exit;
+}
 
-if (!$orcamentoAtual) die("Orçamento não encontrado");
-
-$valor = (float)$orcamentoAtual['valor_estimado'];
-
-// custo médio (mesma lógica do dashboard)
-$totalCustos = $pdo->query("
-    SELECT COALESCE(SUM(valor),0) FROM custos
-")->fetchColumn();
-
-$totalProjetos = $pdo->query("
-    SELECT COUNT(*) FROM projetos
-")->fetchColumn();
-
-$custoEstimado = $totalProjetos > 0 ? ($totalCustos / $totalProjetos) : 0;
-
-$lucro  = $valor - $custoEstimado;
-$margem = $valor > 0 ? ($lucro / $valor) * 100 : 0;
-
+/* =========================
+   BUSCA ORÇAMENTO ATUAL
+========================= */
 $stmt = $pdo->prepare("
-    UPDATE orcamentos SET
-        cliente_id = ?,
-        tipo_projeto = ?,
-        tipo_design = ?,
-        urgencia = ?,
-        descricao = ?,
-        custo_estimado = ?,
-        lucro_estimado = ?,
-        margem_estimada = ?,
-        status = ?
+    SELECT *
+    FROM orcamentos
     WHERE id = ?
 ");
+$stmt->execute([$id]);
+$orcamento = $stmt->fetch(PDO::FETCH_ASSOC);
 
+if (!$orcamento) {
+    header("Location: orcamentos.php");
+    exit;
+}
+
+/* =========================
+   REGRAS DE STATUS (PASSO 3)
+========================= */
+if (in_array($orcamento['status'], ['rejeitado', 'convertido'])) {
+    header("Location: orcamentos.php");
+    exit;
+}
+
+/* =========================
+   VALIDA STATUS PERMITIDO
+========================= */
+$statusPermitidos = ['rascunho','enviado','aprovado','rejeitado'];
+
+if (!in_array($statusNovo, $statusPermitidos)) {
+    header("Location: orcamentos.php");
+    exit;
+}
+
+/* =========================
+   RECALCULA VALORES (PASSO 2)
+========================= */
+$calculo = calcularOrcamento((float)$orcamento['valor_estimado']);
+
+$valor_estimado  = $calculo['valor_estimado'];
+$lucro_estimado  = $calculo['lucro_estimado'];
+$margem_estimada = $calculo['margem_estimada'];
+
+/* =========================
+   ATUALIZA ORÇAMENTO
+========================= */
+$stmt = $pdo->prepare("
+    UPDATE orcamentos
+    SET descricao = ?,
+        status = ?,
+        valor_estimado = ?,
+        lucro_estimado = ?,
+        margem_estimada = ?
+    WHERE id = ?
+");
 $stmt->execute([
-    $_POST['cliente_id'] ?: null,
-    $_POST['tipo_projeto'],
-    $_POST['tipo_design'],
-    $_POST['urgencia'],
-    $_POST['descricao'],
-    $custoEstimado,
-    $lucro,
-    $margem,
-    $_POST['status'],
+    $descricao,
+    $statusNovo,
+    $valor_estimado,
+    $lucro_estimado,
+    $margem_estimada,
     $id
 ]);
 
+/* =========================
+   REDIRECIONA
+========================= */
 header("Location: orcamentos.php");
 exit;
+
 
