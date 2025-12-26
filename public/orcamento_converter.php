@@ -92,15 +92,10 @@ try {
     exit;
 
 } catch (Exception $e) {
-
-    /* =========================
-       ROLLBACK EM CASO DE ERRO
-    ========================= */
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-
-    die("Erro ao converter orçamento em projeto.");
+    die("ERRO REAL: " . $e->getMessage());
 }
 
 
