@@ -3,20 +3,29 @@ require __DIR__ . "/../app/auth/seguranca.php";
 require __DIR__ . "/../config/database.php";
 require __DIR__ . "/../libs/fpdf.php";
 
-/* Evita qualquer saída antes do PDF */
+/* =========================
+   EVITA QUALQUER SAÍDA
+========================= */
 ob_clean();
 
-/* Função correta para FPDF */
+/* =========================
+   FUNÇÃO CORRETA PARA FPDF
+========================= */
 function pdf($text) {
     return iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $text ?? '');
 }
 
+/* =========================
+   ID DO ORÇAMENTO
+========================= */
 $id = $_GET['id'] ?? null;
 if (!$id) {
     exit;
 }
 
-/* BUSCA ORÇAMENTO */
+/* =========================
+   BUSCA ORÇAMENTO
+========================= */
 $stmt = $pdo->prepare("
     SELECT 
         o.*,
@@ -34,12 +43,27 @@ if (!$o) {
     exit;
 }
 
-/* CRIA PDF */
+/* =========================
+   CAMINHOS DE IMAGEM
+========================= */
+$logo       = __DIR__ . '/assets/logo.png';
+$assinatura = __DIR__ . '/assets/assinatura.png';
+
+/* =========================
+   CRIA PDF
+========================= */
 $pdf = new FPDF();
 $pdf->AddPage();
-$pdf->SetAutoPageBreak(true, 20);
+$pdf->SetAutoPageBreak(true, 25);
 
-/* CABEÇALHO */
+/* =========================
+   CABEÇALHO COM LOGO
+========================= */
+if (file_exists($logo)) {
+    $pdf->Image($logo, 10, 10, 35);
+}
+
+$pdf->SetY(20);
 $pdf->SetFont('Arial','B',16);
 $pdf->Cell(0,10,pdf('ORÇAMENTO COMERCIAL'),0,1,'C');
 $pdf->Ln(5);
@@ -47,9 +71,11 @@ $pdf->Ln(5);
 $pdf->SetFont('Arial','',12);
 $pdf->Cell(0,8,pdf('Orçamento nº: ') . $o['id'],0,1);
 $pdf->Cell(0,8,pdf('Data: ') . date('d/m/Y', strtotime($o['criado_em'])),0,1);
-$pdf->Ln(5);
+$pdf->Ln(6);
 
-/* CLIENTE */
+/* =========================
+   DADOS DO CLIENTE
+========================= */
 $pdf->SetFont('Arial','B',12);
 $pdf->Cell(0,8,pdf('Dados do Cliente'),0,1);
 
@@ -57,9 +83,11 @@ $pdf->SetFont('Arial','',12);
 $pdf->Cell(0,8,pdf('Nome: ') . pdf($o['cliente']),0,1);
 $pdf->Cell(0,8,pdf('Email: ') . pdf($o['email'] ?: '-'),0,1);
 $pdf->Cell(0,8,pdf('Telefone: ') . pdf($o['telefone'] ?: '-'),0,1);
-$pdf->Ln(5);
+$pdf->Ln(6);
 
-/* PROJETO */
+/* =========================
+   DADOS DO PROJETO
+========================= */
 $pdf->SetFont('Arial','B',12);
 $pdf->Cell(0,8,pdf('Descrição do Projeto'),0,1);
 
@@ -69,15 +97,19 @@ $pdf->Cell(0,8,pdf('Tipo de Design: ') . pdf(ucfirst($o['tipo_design'])),0,1);
 $pdf->Cell(0,8,pdf('Urgência: ') . pdf(ucfirst($o['urgencia'])),0,1);
 $pdf->Ln(4);
 
-/* DESCRIÇÃO */
+/* =========================
+   DESCRIÇÃO DO SERVIÇO
+========================= */
 $pdf->SetFont('Arial','B',12);
 $pdf->Cell(0,8,pdf('Detalhes do Serviço'),0,1);
 
 $pdf->SetFont('Arial','',12);
 $pdf->MultiCell(0,8,pdf($o['descricao']));
-$pdf->Ln(4);
+$pdf->Ln(5);
 
-/* VALOR */
+/* =========================
+   VALOR COMERCIAL
+========================= */
 $pdf->SetFont('Arial','B',12);
 $pdf->Cell(0,8,pdf('Valor do Investimento'),0,1);
 
@@ -90,21 +122,41 @@ $pdf->Cell(
     1
 );
 
-/* RODAPÉ */
+/* =========================
+   ASSINATURA DIGITAL
+========================= */
 $pdf->Ln(15);
+$pdf->SetFont('Arial','',11);
+$pdf->Cell(0,8,pdf('Adalberto Martins'),0,1);
+
+if (file_exists($assinatura)) {
+    $pdf->Image($assinatura, 10, $pdf->GetY(), 50);
+    $pdf->Ln(25);
+}
+
+$pdf->SetFont('Arial','B',11);
+$pdf->Cell(0,8,pdf('AMDigital • Tecnologia & Automação'),0,1);
+
+/* =========================
+   RODAPÉ
+========================= */
+$pdf->Ln(10);
 $pdf->SetFont('Arial','I',10);
 $pdf->Cell(
     0,
     10,
-    pdf('Proposta gerada pelo sistema AMDigital • Documento sem valor fiscal'),
-    0,
+    pdf('www.amdigital.net.br | WhatsApp: (19) 9xxxx-xxxx'),
+    'T',
     1,
     'C'
 );
 
-/* SAÍDA */
+/* =========================
+   SAÍDA FINAL
+========================= */
 $pdf->Output('I', 'orcamento_'.$o['id'].'.pdf');
 exit;
+
 
 
 
