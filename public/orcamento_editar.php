@@ -2,61 +2,40 @@
 require __DIR__ . "/../app/auth/seguranca.php";
 require __DIR__ . "/../config/database.php";
 
+$id = $_GET['id'] ?? null;
+if (!$id) {
+    header("Location: orcamentos.php");
+    exit;
+}
+
 /* =========================
-   FILTROS
+   BUSCA ORÇAMENTO
 ========================= */
-$busca  = $_GET['busca']  ?? '';
-$status = $_GET['status'] ?? '';
-
-$where  = [];
-$params = [];
-
-if ($busca !== '') {
-    $where[] = "(c.nome LIKE ? OR o.descricao LIKE ?)";
-    $params[] = "%$busca%";
-    $params[] = "%$busca%";
-}
-
-if ($status !== '') {
-    $where[] = "o.status = ?";
-    $params[] = $status;
-}
-
-$sql = "
+$stmt = $pdo->prepare("
     SELECT o.*, c.nome AS cliente
     FROM orcamentos o
     LEFT JOIN clientes c ON c.id = o.cliente_id
-";
+    WHERE o.id = ?
+");
+$stmt->execute([$id]);
+$o = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if ($where) {
-    $sql .= " WHERE " . implode(" AND ", $where);
+if (!$o) {
+    header("Location: orcamentos.php");
+    exit;
 }
-
-$sql .= " ORDER BY o.id DESC";
-
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$orcamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 /* =========================
-   COR STATUS
+   REGRAS DE STATUS
 ========================= */
-function corStatus($status) {
-    return match ($status) {
-        'rascunho'   => '#64748b',
-        'enviado'    => '#2563eb',
-        'aprovado'   => '#16a34a',
-        'convertido' => '#0f766e',
-        'rejeitado'  => '#dc2626',
-        default      => '#374151'
-    };
-}
+$bloqueado = in_array($o['status'], ['rejeitado', 'convertido']);
+$permitirConverter = ($o['status'] === 'aprovado');
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Orçamentos</title>
+<title>Editar Orçamento</title>
 
 <style>
 body {
@@ -73,23 +52,12 @@ h1 {
     margin-bottom: 10px;
 }
 
-/* filtros */
-.filtro {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.filtro input,
-.filtro select {
-    padding: 8px;
-}
-
 /* botões */
 .botoes {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .btn {
@@ -98,17 +66,17 @@ h1 {
     text-decoration: none;
     font-weight: bold;
     transition: .2s;
+    border: none;
+    cursor: pointer;
 }
 
 .btn-primary {
-    background: #f97316
-;
+    background: #f97316;
     color: #fff;
 }
 
 .btn-primary:hover {
-    background: #ea580c
-;
+    background: #ea580c;
 }
 
 .btn-secondary {
@@ -120,41 +88,67 @@ h1 {
     background: #d1d5db;
 }
 
-/* tabela */
-.table-wrapper {
+.btn-danger {
+    background: #dc2626;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+/* formulário */
+.form-wrapper {
     display: flex;
     justify-content: center;
 }
 
-.system-table {
+form {
     width: 100%;
-    max-width: 1200px;
-    border-collapse: collapse;
+    max-width: 900px;
     background: #fff;
-    border: 1px solid #e5e7eb;
+    padding: 20px;
     border-radius: 10px;
-    overflow: hidden;
+    border: 1px solid #e5e7eb;
     box-shadow: 0 4px 10px rgba(0,0,0,.08);
 }
 
-.system-table th,
-.system-table td {
-    padding: 12px;
-    border-bottom: 1px solid #e5e7eb;
-    text-align: left;
+form label {
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
 }
 
-.system-table thead {
+form input,
+form select,
+form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: 1px solid #cbd5f5;
+}
+
+form textarea {
+    min-height: 120px;
+}
+
+/* info */
+.info-box {
     background: #f8fafc;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    border: 1px solid #e5e7eb;
 }
 
-.linha-click {
-    cursor: pointer;
-    transition: background-color .15s ease;
-}
-
-.linha-click:hover {
-    background-color: #f3f4f6;
+.alert {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #9a3412;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
 }
 </style>
 </head>
@@ -162,78 +156,85 @@ h1 {
 <body>
 <div class="container">
 
-<h1>Orçamentos</h1>
+<h1>Editar Orçamento #<?= $o['id'] ?></h1>
 
-<!-- FILTRO (PADRÃO PROJETOS) -->
-<form method="get" class="filtro">
-    <input type="text" name="busca" placeholder="Buscar cliente ou descrição"
-           value="<?= htmlspecialchars($busca) ?>">
+<div class="botoes">
+    <a href="orcamentos.php" class="btn btn-secondary">⬅ Voltar</a>
+</div>
 
-    <select name="status">
-        <option value="">Todos os status</option>
+<?php if ($bloqueado): ?>
+    <div class="alert">
+        Este orçamento está com status <strong><?= strtoupper($o['status']) ?></strong> e não pode mais ser alterado.
+    </div>
+<?php endif; ?>
+
+<div class="form-wrapper">
+<form method="post" action="orcamento_atualizar.php">
+
+    <input type="hidden" name="id" value="<?= $o['id'] ?>">
+
+    <label>Cliente</label>
+    <input type="text" value="<?= htmlspecialchars($o['cliente'] ?? '—') ?>" disabled>
+
+    <label>Tipo de Projeto</label>
+    <input type="text" value="<?= ucfirst($o['tipo_projeto']) ?>" disabled>
+
+    <label>Tipo de Design</label>
+    <input type="text" value="<?= ucfirst($o['tipo_design']) ?>" disabled>
+
+    <label>Urgência</label>
+    <input type="text" value="<?= ucfirst($o['urgencia']) ?>" disabled>
+
+    <label>Descrição</label>
+    <textarea name="descricao" <?= $bloqueado ? 'disabled' : '' ?>>
+<?= htmlspecialchars($o['descricao'] ?? '') ?>
+    </textarea>
+
+    <label>Status</label>
+    <select name="status" <?= $bloqueado ? 'disabled' : '' ?>>
         <?php
-        $statusList = ['rascunho','enviado','aprovado','convertido','rejeitado'];
+        $statusList = ['rascunho','enviado','aprovado','rejeitado','convertido'];
         foreach ($statusList as $s):
         ?>
-        <option value="<?= $s ?>" <?= $s === $status ? 'selected' : '' ?>>
+        <option value="<?= $s ?>" <?= $s === $o['status'] ? 'selected' : '' ?>>
             <?= ucfirst($s) ?>
         </option>
         <?php endforeach; ?>
     </select>
 
-    <button class="btn btn-primary">Filtrar</button>
-    <a href="orcamentos.php" class="btn btn-secondary">Limpar</a>
+    <div class="info-box">
+        <strong>Resumo Financeiro</strong><br><br>
+        Valor estimado: <strong>R$ <?= number_format($o['valor_estimado'],2,',','.') ?></strong><br>
+        Lucro estimado: <strong>R$ <?= number_format($o['lucro_estimado'],2,',','.') ?></strong><br>
+        Margem estimada: <strong><?= number_format($o['margem_estimada'],2,',','.') ?>%</strong>
+    </div>
+
+    <div class="botoes" style="margin-top:20px;">
+        <?php if (!$bloqueado): ?>
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        <?php endif; ?>
+
+        <?php if ($permitirConverter): ?>
+            <a href="orcamento_converter.php?id=<?= $o['id'] ?>"
+               class="btn btn-primary"
+               onclick="return confirm('Converter este orçamento em projeto?')">
+               Converter em Projeto
+            </a>
+        <?php endif; ?>
+
+        <?php if ($o['status'] === 'rascunho'): ?>
+            <a href="orcamento_excluir.php?id=<?= $o['id'] ?>"
+               class="btn btn-danger"
+               onclick="return confirm('Excluir este orçamento?')">
+               Excluir
+            </a>
+        <?php endif; ?>
+    </div>
+
 </form>
-
-<div class="botoes">
-    <a href="orcamento_novo.php" class="btn btn-primary">➕ Novo Orçamento</a>
-    <a href="index.php" class="btn btn-secondary">⬅ Dashboard</a>
-</div>
-
-<div class="table-wrapper">
-<table class="system-table">
-<thead>
-<tr>
-    <th>ID</th>
-    <th>Cliente</th>
-    <th>Status</th>
-    <th>Valor</th>
-    <th>Lucro</th>
-    <th>Margem</th>
-</tr>
-</thead>
-<tbody>
-
-<?php if (!$orcamentos): ?>
-<tr>
-    <td colspan="6" style="text-align:center;color:#64748b;">
-        Nenhum orçamento encontrado
-    </td>
-</tr>
-<?php endif; ?>
-
-<?php foreach ($orcamentos as $o): ?>
-<tr class="linha-click"
-    onclick="location.href='orcamento_editar.php?id=<?= $o['id'] ?>'">
-
-    <td><?= $o['id'] ?></td>
-
-    <td><?= htmlspecialchars($o['cliente'] ?? '—') ?></td>
-
-    <td style="color:<?= corStatus($o['status']) ?>; font-weight:bold;">
-        <?= strtoupper($o['status']) ?>
-    </td>
-
-    <td>R$ <?= number_format($o['valor_estimado'],2,',','.') ?></td>
-    <td>R$ <?= number_format($o['lucro_estimado'],2,',','.') ?></td>
-    <td><?= number_format($o['margem_estimada'],2,',','.') ?>%</td>
-</tr>
-<?php endforeach; ?>
-
-</tbody>
-</table>
 </div>
 
 </div>
 </body>
 </html>
+
