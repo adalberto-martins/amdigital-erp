@@ -390,6 +390,16 @@ h1 {
 <body>
 <div class="container">
 
+<div class="menu">
+    <a href="clientes.php">Clientes</a>
+    <a href="projetos.php">Projetos</a>
+    <a href="ordens_servico.php">OS</a>
+    <a href="financeiro.php">Financeiro</a>
+    <a href="custos.php">Custos</a>
+    <a href="orcamentos.php">Orçamentos</a>
+    <a href="index.php">Sair</a>
+</div>
+
 <h1>Dashboard Geral</h1>
 
 <div class="cards">
@@ -512,14 +522,6 @@ h1 {
             <canvas id="graficoMargemProjeto"></canvas>
         </div>
     </div>
-</div>
-
-<div class="menu">
-    <a href="clientes.php">Clientes</a>
-    <a href="projetos.php">Projetos</a>
-    <a href="ordens_servico.php">OS</a>
-    <a href="financeiro.php">Financeiro</a>
-    <a href="custos.php">Custos</a>
 </div>
 
 </div>
