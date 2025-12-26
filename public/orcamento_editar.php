@@ -159,6 +159,11 @@ form textarea {
 <h1>Editar Orçamento #<?= $o['id'] ?></h1>
 
 <div class="botoes">
+        <a href="orcamento_pdf.php?id=<?= $o['id'] ?>"
+       class="btn btn-secondary"
+       target="_blank">
+       📄 Gerar PDF
+    </a>
     <a href="orcamentos.php" class="btn btn-secondary">⬅ Voltar</a>
 </div>
 
