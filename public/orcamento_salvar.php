@@ -1,8 +1,17 @@
 <?php
 require __DIR__ . "/../app/auth/seguranca.php";
+require __DIR__ . "/../app/helpers/orcamento_helper.php";
 require __DIR__ . "/../config/database.php";
 
-$valor = $_POST['valor_estimado'];
+
+$valor = (float) $_POST['valor_estimado'];
+
+$calculo = calcularOrcamento($valor);
+
+$valor_estimado  = $calculo['valor_estimado'];
+$lucro_estimado  = $calculo['lucro_estimado'];
+$margem_estimada = $calculo['margem_estimada'];
+
 
 // custo médio (mesma lógica do dashboard)
 $totalCustos = $pdo->query("SELECT COALESCE(SUM(valor),0) FROM custos")->fetchColumn();
