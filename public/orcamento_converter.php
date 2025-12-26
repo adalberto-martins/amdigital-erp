@@ -25,22 +25,10 @@ if (!$orcamento) {
 }
 
 /* =========================
-   REGRA DE NEGÓCIO (PASSO 3)
+   REGRA DE NEGÓCIO
 ========================= */
-/*
- Somente orçamento APROVADO
- pode ser convertido em projeto
-*/
 if ($orcamento['status'] !== 'aprovado') {
     header("Location: orcamentos.php");
-    exit;
-}
-
-/* =========================
-   PROTEÇÃO CONTRA DUPLICIDADE
-========================= */
-if (!empty($orcamento['projeto_id'])) {
-    header("Location: projetos.php");
     exit;
 }
 
@@ -57,7 +45,7 @@ try {
         INSERT INTO projetos
         (cliente_id, nome, tipo, descricao, valor, status, data_inicio)
         VALUES
-        (?, ?, ?, ?, ?, 'em_andamento', CURDATE())
+        (?, ?, ?, ?, ?, 'ativo', CURDATE())
     ");
     $stmt->execute([
         $orcamento['cliente_id'],
@@ -67,22 +55,16 @@ try {
         $orcamento['valor_estimado']
     ]);
 
-    $projetoId = $pdo->lastInsertId();
-
     /* =========================
        ATUALIZA ORÇAMENTO
-    ========================= */
+========================= */
     $stmt = $pdo->prepare("
         UPDATE orcamentos
-        SET status = 'convertido',
-            projeto_id = ?
+        SET status = 'convertido'
         WHERE id = ?
     ");
-    $stmt->execute([$projetoId, $id]);
+    $stmt->execute([$id]);
 
-    /* =========================
-       FINALIZA TRANSAÇÃO
-    ========================= */
     $pdo->commit();
 
     /* =========================
@@ -95,8 +77,10 @@ try {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    die("ERRO REAL: " . $e->getMessage());
+    die("Erro ao converter orçamento em projeto: " . $e->getMessage());
 }
+
+
 
 
 
