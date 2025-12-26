@@ -32,7 +32,7 @@ if ($where) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
 
-$sql .= " ORDER BY o.id DESC";
+$sql .= " ORDER BY nome";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
