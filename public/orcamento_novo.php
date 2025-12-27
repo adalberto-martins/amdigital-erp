@@ -72,6 +72,7 @@ textarea { min-height: 120px; }
     <option value="site">Site</option>
     <option value="sistema">Sistema</option>
     <option value="landing">Landing Page</option>
+    <option value="formatacao">Formatação</option>
 </select>
 
 <label>Tipo de Design</label>
@@ -119,6 +120,7 @@ function calcular() {
         case 'site': base = 2000; break;
         case 'sistema': base = 5000; break;
         case 'landing': base = 1200; break;
+        case 'formatacao': base = 50; break;
     }
 
     // design
