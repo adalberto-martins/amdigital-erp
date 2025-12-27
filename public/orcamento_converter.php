@@ -2,6 +2,9 @@
 require __DIR__ . "/../app/auth/seguranca.php";
 require __DIR__ . "/../config/database.php";
 
+/* =========================
+   ID DO ORÇAMENTO
+========================= */
 $id = $_GET['id'] ?? null;
 if (!$id) {
     header("Location: orcamentos.php");
@@ -11,74 +14,69 @@ if (!$id) {
 /* =========================
    BUSCA ORÇAMENTO
 ========================= */
-$stmt = $pdo->prepare("
-    SELECT *
-    FROM orcamentos
-    WHERE id = ?
-");
+$stmt = $pdo->prepare("SELECT * FROM orcamentos WHERE id = ?");
 $stmt->execute([$id]);
-$orcamento = $stmt->fetch(PDO::FETCH_ASSOC);
+$o = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$orcamento) {
+if (!$o || $o['status'] !== 'aprovado') {
     header("Location: orcamentos.php");
     exit;
 }
 
 /* =========================
-   REGRA DE NEGÓCIO
+   CRIA PROJETO
 ========================= */
-if ($orcamento['status'] !== 'aprovado') {
-    header("Location: orcamentos.php");
-    exit;
-}
-
-try {
-    /* =========================
-       TRANSAÇÃO
-    ========================= */
-    $pdo->beginTransaction();
-
-    /* =========================
-       CRIA PROJETO
-    ========================= */
-    $stmt = $pdo->prepare("
-        INSERT INTO projetos
+$stmt = $pdo->prepare("
+    INSERT INTO projetos
         (cliente_id, nome, tipo, descricao, valor, status, data_inicio)
-        VALUES
-        (?, ?, ?, ?, ?, 'ativo', CURDATE())
-    ");
-    $stmt->execute([
-        $orcamento['cliente_id'],
-        'Projeto - Orçamento #' . $orcamento['id'],
-        $orcamento['tipo_projeto'],
-        $orcamento['descricao'],
-        $orcamento['valor_estimado']
-    ]);
+    VALUES
+        (?, ?, ?, ?, ?, 'em_andamento', CURDATE())
+");
 
-    /* =========================
-       ATUALIZA ORÇAMENTO
+$stmt->execute([
+    $o['cliente_id'],
+    'Projeto - Orçamento #' . $o['id'],
+    $o['tipo_projeto'],
+    $o['descricao'],
+    $o['valor_estimado']
+]);
+
+$projetoId = $pdo->lastInsertId();
+
+/* =========================
+   CRIA OS AUTOMÁTICA
 ========================= */
-    $stmt = $pdo->prepare("
-        UPDATE orcamentos
-        SET status = 'convertido'
-        WHERE id = ?
-    ");
-    $stmt->execute([$id]);
+$stmt = $pdo->prepare("
+    INSERT INTO ordens_servico
+        (cliente_id, projeto_id, descricao, valor, status, data_inicio)
+    VALUES
+        (?, ?, ?, ?, 'aberta', CURDATE())
+");
 
-    $pdo->commit();
+$stmt->execute([
+    $o['cliente_id'],
+    $projetoId,
+    'Ordem de serviço inicial do projeto',
+    $o['valor_estimado']
+]);
 
-    /* =========================
-       REDIRECIONA
-    ========================= */
-    header("Location: projetos.php");
-    exit;
+/* =========================
+   MARCA ORÇAMENTO COMO CONVERTIDO
+========================= */
+$stmt = $pdo->prepare("
+    UPDATE orcamentos
+    SET status = 'convertido'
+    WHERE id = ?
+");
+$stmt->execute([$id]);
 
-} catch (Exception $e) {
-    if ($pdo->inTransaction()) {
-        $pdo->rollBack();
-    }
-    die("Erro ao converter orçamento em projeto: " . $e->getMessage());
-}
+/* =========================
+   REDIRECIONA
+========================= */
+header("Location: projetos.php");
+exit;
+
+
 
 
 
