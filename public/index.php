@@ -471,7 +471,7 @@ footer {
 
 
     <div class="card card-dashboard">
-        <h3>📊 Visão Geral</h3>
+        <h3>📊 Serviços</h3>
 
         <div class="big">
             R$ <?= number_format($saldoAtual, 2, ',', '.') ?>
@@ -488,7 +488,8 @@ footer {
             📈 Lucro estimado (mês): 
             <strong><?= number_format($lucroMes,2,',','.') ?></strong>
         </small>
-
+        
+        <a href="servicos.php">➡ Acessar Serviços</a>
         
     </div>
 
