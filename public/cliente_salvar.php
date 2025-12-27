@@ -1,25 +1,45 @@
 <?php
-require "../app/auth/verifica_login.php";
-require "../config/database.php";
+require __DIR__ . "/../app/auth/seguranca.php";
+require __DIR__ . "/../config/database.php";
 
-// Dados do formulário
-$nome = $_POST['nome'] ?? '';
-$email = $_POST['email'] ?? '';
-$telefone = $_POST['telefone'] ?? '';
-$status = $_POST['status'] ?? 'ativo';
+/* validação básica */
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: clientes.php");
+    exit;
+}
 
-// Validação mínima
-if ($nome === '') {
+$nome        = $_POST['nome'] ?? '';
+$cpf_cnpj   = $_POST['cpf_cnpj'] ?? null;
+$email       = $_POST['email'] ?? null;
+$telefone    = $_POST['telefone'] ?? null;
+$endereco    = $_POST['endereco'] ?? null;
+$observacoes = $_POST['observacoes'] ?? null;
+$status      = $_POST['status'] ?? 'ativo';
+
+/* nome é obrigatório */
+if (trim($nome) === '') {
     header("Location: cliente_novo.php");
     exit;
 }
 
-// Inserção no banco
-$sql = "INSERT INTO clientes (nome, email, telefone, status)
-        VALUES (?, ?, ?, ?)";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([$nome, $email, $telefone, $status]);
+/* insert */
+$stmt = $pdo->prepare("
+    INSERT INTO clientes 
+    (nome, cpf_cnpj, email, telefone, endereco, observacoes, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+");
 
-// Volta para listagem
+$stmt->execute([
+    $nome,
+    $cpf_cnpj,
+    $email,
+    $telefone,
+    $endereco,
+    $observacoes,
+    $status
+]);
+
+/* redireciona */
 header("Location: clientes.php");
 exit;
+
