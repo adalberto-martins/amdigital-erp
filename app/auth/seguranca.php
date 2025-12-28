@@ -16,4 +16,9 @@ function exigeAdmin() {
         header("Location: ../public/index.php");
         exit;
     }
+
+    if ($_SESSION['usuario_nivel'] !== 'admin') {
+    die("Acesso restrito ao administrador");
+}
+
 }
