@@ -17,10 +17,16 @@ if (!$id || $id == $_SESSION['usuario_id']) {
     exit;
 }
 
+if ($_GET['id'] == $_SESSION['usuario_id']) {
+    die("Você não pode excluir seu próprio usuário");
+}
+
 // Excluir usuário
 $sql = "DELETE FROM usuarios WHERE id = ?";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$id]);
+
+
 
 header("Location: usuarios.php");
 exit;
