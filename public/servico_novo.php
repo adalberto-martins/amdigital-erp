@@ -2,42 +2,122 @@
 require __DIR__ . "/../app/auth/seguranca.php";
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <title>Novo Serviço</title>
 
 <style>
-body{font-family:Arial;background:#f1f5f9}
-.container{max-width:1200px;margin:auto}
-.botoes{display:flex;gap:10px;margin-bottom:15px}
-.btn{padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:bold}
-.btn-primary{background:#8b5cf6;color:#fff}
-.btn-primary:hover{background:#7c3aed}
-.btn-secondary{background:#e5e7eb;color:#374151}
-.table-wrapper{display:flex;justify-content:center}
-table{width:100%;background:#fff;border-collapse:collapse;border-radius:10px;overflow:hidden}
-th,td{padding:12px;border-bottom:1px solid #e5e7eb}
-tr.linha-click{cursor:pointer}
-tr.linha-click:hover{background:#f3f4f6}
+body {
+    font-family: Arial, sans-serif;
+    background: #f1f5f9;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+/* botões */
+.botoes {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: .2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #8b5cf6;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #7c3aed;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.btn-secondary:hover {
+    background: #d1d5db;
+}
+
+/* formulário */
+.form-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+form {
+    width: 100%;
+    max-width: 900px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 10px rgba(0,0,0,.08);
+}
+
+form label {
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+}
+
+form input,
+form select,
+form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: 1px solid #cbd5f5;
+}
+
+form textarea {
+    min-height: 100px;
+}
 </style>
 </head>
+
 <body>
+<div class="container">
 
 <h1>Novo Serviço</h1>
 
+<div class="botoes">
+    <a href="servicos.php" class="btn btn-secondary">⬅ Voltar</a>
+</div>
+
+<div class="form-wrapper">
 <form method="post" action="servico_salvar.php">
-    <label>Nome</label>
-    <input name="nome" required>
+
+    <label>Nome do Serviço</label>
+    <input type="text" name="nome" required>
 
     <label>Categoria</label>
-    <input name="categoria" required>
+    <input type="text" name="categoria" required>
 
     <label>Descrição</label>
     <textarea name="descricao"></textarea>
 
-    <label>Valor Base</label>
-    <input name="valor_base" type="number" step="0.01" required>
+    <label>Valor Base (R$)</label>
+    <input type="number" step="0.01" name="valor_base" required>
 
     <label>Status</label>
     <select name="ativo">
@@ -45,8 +125,15 @@ tr.linha-click:hover{background:#f3f4f6}
         <option value="nao">Inativo</option>
     </select>
 
-    <button type="submit">Salvar</button>
-</form>
+    <div class="botoes" style="margin-top:20px;">
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="servicos.php" class="btn btn-secondary">Cancelar</a>
+    </div>
 
+</form>
+</div>
+
+</div>
 </body>
 </html>
+
