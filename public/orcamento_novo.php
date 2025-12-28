@@ -3,7 +3,22 @@ require __DIR__ . "/../app/auth/seguranca.php";
 require __DIR__ . "/../config/database.php";
 
 /* clientes */
-$clientes = $pdo->query("SELECT id, nome FROM clientes ORDER BY nome")->fetchAll();
+$stmtClientes = $pdo->query("
+    SELECT id, nome 
+    FROM clientes 
+    WHERE status = 'ativo' 
+    ORDER BY nome
+");
+$clientes = $stmtClientes->fetchAll(PDO::FETCH_ASSOC);
+
+/* serviços */
+$stmtServicos = $pdo->query("
+    SELECT id, nome, categoria, valor_base 
+    FROM servicos 
+    WHERE ativo = 1 
+    ORDER BY categoria, nome
+");
+$servicos = $stmtServicos->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -12,43 +27,119 @@ $clientes = $pdo->query("SELECT id, nome FROM clientes ORDER BY nome")->fetchAll
 <title>Novo Orçamento</title>
 
 <style>
-body { font-family: Arial, sans-serif; background: #f1f5f9; }
-.container { max-width: 1200px; margin: auto; }
-h1 { margin-bottom: 15px; }
-
-form {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
-    max-width: 900px;
+body {
+    font-family: Arial, sans-serif;
+    background: #f1f5f9;
 }
 
-label { font-weight: bold; display:block; margin-top:10px; }
-
-input, select, textarea {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #cbd5f5;
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-textarea { min-height: 120px; }
+h1 {
+    margin-bottom: 15px;
+}
 
-.botoes { margin-top: 20px; display:flex; gap:10px; }
+/* botões */
+.botoes {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
 
 .btn {
     padding: 10px 18px;
     border-radius: 8px;
-    border:none;
-    cursor:pointer;
-    font-weight:bold;
+    text-decoration: none;
+    font-weight: bold;
+    transition: .2s;
+    border: none;
+    cursor: pointer;
 }
 
-.btn-primary { background:#f97316; color:#fff; }
-.btn-primary:hover { background:#ea580c; }
+.btn-primary {
+    background: #f97316;
+    color: #fff;
+}
 
-.btn-secondary { background:#e5e7eb; }
+.btn-primary:hover {
+    background: #ea580c;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.btn-secondary:hover {
+    background: #d1d5db;
+}
+
+/* formulário */
+.form-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+form {
+    width: 100%;
+    max-width: 900px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 10px rgba(0,0,0,.08);
+}
+
+form label {
+    font-weight: bold;
+    display: block;
+    margin-top: 12px;
+}
+
+form input,
+form select,
+form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: 1px solid #cbd5f5;
+}
+
+form textarea {
+    min-height: 120px;
+}
+
+/* serviços */
+.servicos-box {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+    background: #f8fafc;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.servico-item {
+    display: block;
+    padding: 6px;
+    cursor: pointer;
+}
+
+.servico-item:hover {
+    background: #f1f5f9;
+}
+
+.info-box {
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    border: 1px solid #e5e7eb;
+}
 </style>
 </head>
 
@@ -57,149 +148,90 @@ textarea { min-height: 120px; }
 
 <h1>Novo Orçamento</h1>
 
-<form method="post" action="orcamento_salvar.php" id="orcamentoForm">
-
-<h3>Serviços</h3>
-
-<?php
-$servicos = $pdo->query("
-    SELECT * FROM servicos 
-    WHERE ativo='sim' 
-    ORDER BY categoria, nome
-")->fetchAll(PDO::FETCH_ASSOC);
-
-foreach ($servicos as $s):
-?>
-<div style="margin-bottom:6px;">
-    <label>
-        <input type="checkbox"
-               name="servicos[<?= $s['id'] ?>][ativo]"
-               data-valor="<?= $s['valor_base'] ?>"
-               class="servico-check">
-        <?= htmlspecialchars($s['nome']) ?> 
-        (R$ <?= number_format($s['valor_base'],2,',','.') ?>)
-    </label>
-
-    <input type="number"
-           name="servicos[<?= $s['id'] ?>][quantidade]"
-           value="1"
-           min="1"
-           class="servico-qtd"
-           style="width:70px;">
-</div>
-<?php endforeach; ?>
-
-<label>Cliente</label>
-<select name="cliente_id" required>
-    <option value="">Selecione</option>
-    <?php foreach ($clientes as $c): ?>
-        <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['nome']) ?></option>
-    <?php endforeach; ?>
-</select>
-
-<label>Tipo de Projeto</label>
-<select id="tipo_projeto" name="tipo_projeto">
-    <option value="site">Site</option>
-    <option value="sistema">Sistema</option>
-    <option value="landing">Landing Page</option>
-    <option value="formatacao">Formatação</option>
-</select>
-
-<label>Tipo de Design</label>
-<select id="tipo_design" name="tipo_design">
-    <option value="basico">Básico</option>
-    <option value="profissional">Profissional</option>
-    <option value="premium">Premium</option>
-</select>
-
-<label>Urgência</label>
-<select id="urgencia" name="urgencia">
-    <option value="normal">Normal</option>
-    <option value="urgente">Urgente</option>
-</select>
-
-<label>Descrição</label>
-<textarea name="descricao"></textarea>
-
-<hr>
-
-<label>Valor Estimado (R$)</label>
-<input type="text" id="valor_estimado" name="valor_estimado" readonly>
-
-<label>Lucro Estimado (R$)</label>
-<input type="text" id="lucro_estimado" name="lucro_estimado" readonly>
-
-<label>Margem (%)</label>
-<input type="text" id="margem_estimada" name="margem_estimada" readonly>
-
 <div class="botoes">
-    <button class="btn btn-primary">Salvar Orçamento</button>
-    <a href="orcamentos.php" class="btn btn-secondary">Cancelar</a>
+    <a href="orcamentos.php" class="btn btn-secondary">⬅ Voltar</a>
 </div>
+
+<div class="form-wrapper">
+<form method="post" action="orcamento_salvar.php">
+
+    <label>Cliente</label>
+    <select name="cliente_id" required>
+        <option value="">Selecione</option>
+        <?php foreach ($clientes as $c): ?>
+            <option value="<?= $c['id'] ?>">
+                <?= htmlspecialchars($c['nome']) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+
+    <label>Descrição do Orçamento</label>
+    <textarea name="descricao"></textarea>
+
+    <label>Serviços</label>
+    <div class="servicos-box">
+        <?php foreach ($servicos as $s): ?>
+            <label class="servico-item">
+                <input 
+                    type="checkbox"
+                    name="servicos[]"
+                    value="<?= $s['id'] ?>"
+                    data-valor="<?= $s['valor_base'] ?>"
+                    onchange="recalcularTotal()"
+                >
+                <strong><?= htmlspecialchars($s['nome']) ?></strong>
+                <small>
+                    (<?= htmlspecialchars($s['categoria']) ?>) — 
+                    R$ <?= number_format($s['valor_base'],2,',','.') ?>
+                </small>
+            </label>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="botoes" style="margin-top:10px;">
+        <a href="servico_novo.php" class="btn btn-secondary">
+            ➕ Novo Serviço
+        </a>
+    </div>
+
+    <label>Valor estimado (R$)</label>
+    <input 
+        type="text" 
+        id="valor_estimado" 
+        name="valor_estimado" 
+        readonly
+    >
+
+    <label>Status</label>
+    <select name="status">
+        <option value="rascunho">Rascunho</option>
+        <option value="enviado">Enviado</option>
+    </select>
+
+    <div class="botoes" style="margin-top:20px;">
+        <button type="submit" class="btn btn-primary">
+            Salvar Orçamento
+        </button>
+    </div>
 
 </form>
 </div>
 
-<script>
-function calcular() {
-
-    let base = 0;
-
-    // tipo projeto
-    switch (document.getElementById('tipo_projeto').value) {
-        case 'site': base = 2000; break;
-        case 'sistema': base = 5000; break;
-        case 'landing': base = 1200; break;
-        case 'formatacao': base = 50; break;
-    }
-
-    // design
-    let design = document.getElementById('tipo_design').value;
-    if (design === 'profissional') base *= 1.2;
-    if (design === 'premium') base *= 1.5;
-
-    // urgência
-    if (document.getElementById('urgencia').value === 'urgente') {
-        base *= 1.3;
-    }
-
-    let custo = base * 0.6;
-    let lucro = base - custo;
-    let margem = (lucro / base) * 100;
-
-    document.getElementById('valor_estimado').value = base.toFixed(2);
-    document.getElementById('lucro_estimado').value = lucro.toFixed(2);
-    document.getElementById('margem_estimada').value = margem.toFixed(2);
-}
-
-// eventos
-document.querySelectorAll(
-    '#tipo_projeto, #tipo_design, #urgencia'
-).forEach(el => el.addEventListener('change', calcular));
-
-calcular();
-</script>
+</div>
 
 <script>
-function calcularOrcamento() {
+function recalcularTotal() {
     let total = 0;
 
-    document.querySelectorAll('.servico-check').forEach((check, i) => {
-        if (check.checked) {
-            let valor = parseFloat(check.dataset.valor);
-            let qtd = document.querySelectorAll('.servico-qtd')[i].value;
-            total += valor * qtd;
-        }
-    });
+    document.querySelectorAll('input[name="servicos[]"]:checked')
+        .forEach(el => {
+            total += parseFloat(el.dataset.valor);
+        });
 
-    document.getElementById('valor_estimado').value = total.toFixed(2);
+    document.getElementById('valor_estimado').value =
+        total.toFixed(2).replace('.', ',');
 }
-
-document.querySelectorAll('.servico-check, .servico-qtd').forEach(el => {
-    el.addEventListener('change', calcularOrcamento);
-});
 </script>
-
 
 </body>
 </html>
