@@ -22,6 +22,10 @@ if ($nome === '' || $email === '' || $senha === '') {
     exit;
 }
 
+if (strlen($_POST['senha']) < 8) {
+    die("Senha deve ter no mínimo 8 caracteres");
+}
+
 // Criptografar senha
 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
