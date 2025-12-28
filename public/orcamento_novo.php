@@ -59,6 +59,36 @@ textarea { min-height: 120px; }
 
 <form method="post" action="orcamento_salvar.php" id="orcamentoForm">
 
+<h3>Serviços</h3>
+
+<?php
+$servicos = $pdo->query("
+    SELECT * FROM servicos 
+    WHERE ativo='sim' 
+    ORDER BY categoria, nome
+")->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($servicos as $s):
+?>
+<div style="margin-bottom:6px;">
+    <label>
+        <input type="checkbox"
+               name="servicos[<?= $s['id'] ?>][ativo]"
+               data-valor="<?= $s['valor_base'] ?>"
+               class="servico-check">
+        <?= htmlspecialchars($s['nome']) ?> 
+        (R$ <?= number_format($s['valor_base'],2,',','.') ?>)
+    </label>
+
+    <input type="number"
+           name="servicos[<?= $s['id'] ?>][quantidade]"
+           value="1"
+           min="1"
+           class="servico-qtd"
+           style="width:70px;">
+</div>
+<?php endforeach; ?>
+
 <label>Cliente</label>
 <select name="cliente_id" required>
     <option value="">Selecione</option>
@@ -149,6 +179,27 @@ document.querySelectorAll(
 
 calcular();
 </script>
+
+<script>
+function calcularOrcamento() {
+    let total = 0;
+
+    document.querySelectorAll('.servico-check').forEach((check, i) => {
+        if (check.checked) {
+            let valor = parseFloat(check.dataset.valor);
+            let qtd = document.querySelectorAll('.servico-qtd')[i].value;
+            total += valor * qtd;
+        }
+    });
+
+    document.getElementById('valor_estimado').value = total.toFixed(2);
+}
+
+document.querySelectorAll('.servico-check, .servico-qtd').forEach(el => {
+    el.addEventListener('change', calcularOrcamento);
+});
+</script>
+
 
 </body>
 </html>
