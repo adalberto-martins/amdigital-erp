@@ -12,6 +12,33 @@ $valor_estimado  = $calculo['valor_estimado'];
 $lucro_estimado  = $calculo['lucro_estimado'];
 $margem_estimada = $calculo['margem_estimada'];
 
+if (!empty($_POST['servicos'])) {
+
+    foreach ($_POST['servicos'] as $servicoId => $dados) {
+
+        if (!isset($dados['ativo'])) continue;
+
+        $quantidade = $dados['quantidade'] ?? 1;
+
+        // buscar valor base
+        $stmt = $pdo->prepare("SELECT valor_base FROM servicos WHERE id=?");
+        $stmt->execute([$servicoId]);
+        $valor = $stmt->fetchColumn();
+
+        $stmt = $pdo->prepare("
+            INSERT INTO orcamento_servicos
+                (orcamento_id, servico_id, quantidade, valor_unitario)
+            VALUES (?, ?, ?, ?)
+        ");
+
+        $stmt->execute([
+            $orcamentoId,
+            $servicoId,
+            $quantidade,
+            $valor
+        ]);
+    }
+}
 
 // custo médio (mesma lógica do dashboard)
 $totalCustos = $pdo->query("SELECT COALESCE(SUM(valor),0) FROM custos")->fetchColumn();
