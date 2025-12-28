@@ -4,6 +4,10 @@ exigeAdmin();
 
 require __DIR__ . "/../config/database.php";
 
+if ($_GET['id'] == $_SESSION['usuario_id']) {
+    die("Você não pode excluir seu próprio usuário");
+}
+
 // Validar ID
 $id = $_GET['id'] ?? null;
 if (!$id) {
@@ -22,6 +26,7 @@ if (!$usuario) {
     header("Location: usuarios.php");
     exit;
 }
+
 ?>
 
 <!DOCTYPE html>
