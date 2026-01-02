@@ -1,24 +1,10 @@
 <?php
-// Garante sessão ativa
-if (!isset($_SESSION)) {
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 // Verifica login
 if (!isset($_SESSION['usuario_id'])) {
-    header("Location: ../public/login.php");
+    header("Location: /login.php");
     exit;
-}
-
-// Função para restringir por nível
-function exigeAdmin() {
-    if (!isset($_SESSION['usuario_nivel']) || $_SESSION['usuario_nivel'] !== 'admin') {
-        header("Location: ../public/index.php");
-        exit;
-    }
-
-    if ($_SESSION['usuario_nivel'] !== 'admin') {
-    die("Acesso restrito ao administrador");
-}
-
 }
